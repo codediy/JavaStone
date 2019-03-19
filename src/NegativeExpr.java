@@ -1,0 +1,19 @@
+import java.util.List;
+
+/*
+* NegativeExpr - primary
+* */
+public class NegativeExpr extends  ASTList{
+
+    public NegativeExpr(List<ASTree> list) {
+        super(list);
+    }
+
+    public ASTree operand(){
+        return child(0);
+    }
+
+    public String toString(){
+        return "-" + operand();
+    }
+}
