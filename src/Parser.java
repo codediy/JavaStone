@@ -1,5 +1,3 @@
-import org.omg.CORBA.ARG_IN;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.rmi.server.ExportException;
@@ -8,8 +6,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
+/*
+* 组合过程 combinator() 从基础Token组合到复杂的高级结构Program
+* 解析过程 parse() 从最高层Program开始递归解析其组成部分
+* */
 public class Parser {
-
+    /*注册的解析器*/
     protected List<Element> elements;
     protected Factory factory;
 
@@ -46,6 +48,7 @@ public class Parser {
         elements.add(new Leaf(pat));
         return this;
     }
+    /*分隔符*/
     public Parser sep(String... pat){
         elements.add(new Skip(pat));
         return this;
@@ -99,15 +102,20 @@ public class Parser {
          reset(clazz);
     }
     protected Parser(Parser p){
+        /*解析的内容元素*/
         elements = p.elements;
+        /*生成语法结构*/
         factory = p.factory;
     }
+    /*解析器入口*/
     public ASTree parse(Lexer lexer) throws  ParseException{
+        /*解析结果*/
         ArrayList<ASTree> results = new ArrayList<>();
+        /*遍历待解析元素*/
         for (Element e : elements) {
             e.parser(lexer,results);
         }
-
+        /*创建语法树*/
         return factory.make(results);
     }
 
@@ -424,20 +432,26 @@ public class Parser {
         }
 
         protected static Factory getForASTList(Class<? extends ASTree> clazz){
+            /*获取构造器*/
             Factory f = get(clazz,List.class);
+
             if (f == null){
                 /*临时对象*/
                 f = new Factory(){
+                    /*make0实现*/
                   protected ASTree make0(Object arg) throws ExportException {
+                      /*生成结果*/
                       List<ASTree> results = (List<ASTree>) arg;
                       if (results.size() == 1){
                           return results.get(0);
                       }else{
+                          /*创建语法树结构*/
                           return new ASTList(results);
                       }
                   }
                 };
             }
+
             return f;
         }
 
